@@ -1,62 +1,65 @@
-def calculate_max_power(n):
+"""
+Задача №4: Стая драконов
 
-    if n <= 1:
-        return 1
-    if n == 2:
-        return 2
-    if n == 3:
-        return 3
-    if n == 4:
-        return 4
-    if n == 5:
-        return 6  
-    if n == 6:
-        return 9  
+
+Условие:
+У каждого дракона есть определённое количество голов, и мощь всей стаи определяется произведением голов всех драконов.
+Дано общее число голов M, требуется вычислить наибольшую возможную мощь стаи.
+"""
+
+def strongest_horde(total_heads):
+    """
+    Вычисляет наибольшую мощь стаи драконов по заданному количеству голов.
     
-
-    dp = [0] * (n + 1)
-    
-
-    dp[0] = 1
-    dp[1] = 1
-    dp[2] = 2
-    dp[3] = 3
-    dp[4] = 4
-    dp[5] = 6
-    dp[6] = 9
-    
- 
-    for i in range(7, n + 1):
-
-        max_product = 0
-        for j in range(2, 8):
-            if j <= i:
-
-                product = j * dp[i - j]
-                if product > max_product:
-                    max_product = product
-        dp[i] = max_product
-    
-    return dp[n]
-
-
-def main():
-    try:
-
-        n = int(input("Введите количество голов N (0 < N < 100): "))
+    Аргументы:
+        total_heads (int): Суммарное число голов
         
+    Возвращает:
+        int: Максимальная мощь стаи
+    """
+    # Наилучший результат достигается, если разбивать головы на группы по 3
+    # Например, 8 = 3+3+2 (3*3*2=18) лучше, чем 2+2+2+2 (2*2*2*2=16)
+    triple_count = total_heads // 3
+    left = total_heads % 3
+    # Если остаток 1, выгоднее заменить одну тройку на две двойки
+    if left == 1 and triple_count > 0:
+        triple_count -= 1
+        left = 4
+    # Итоговое произведение зависит от остатка
+    if left == 0:
+        return 3 ** triple_count
+    elif left == 2:
+        return (3 ** triple_count) * 2
+    else:  # left == 4
+        return (3 ** triple_count) * 4
 
-        if n <= 0 or n >= 100:
-            print("Ошибка: число должно быть в диапазоне 0 < N < 100")
-            return
-        
+# Получение входных данных
+with open("INPUT.TXT", "r") as fin:
+    data = fin.readline().strip()
+    vals = data.split()
+    if len(vals) > 1:
+        heads = int(vals[1])
+    else:
+        heads = int(vals[0])
 
-        result = calculate_max_power(n)
-        print(f"Максимальная сила стаи из {n} голов: {result}")
-        
-    except ValueError:
-        print("Ошибка: введите целое число")
+# Расчёт и вывод результата
+answer = strongest_horde(heads)
+with open("OUTPUT.TXT", "w") as fout:
+    fout.write(str(answer))
 
+"""
+Пояснения:
 
-if __name__ == "__main__":
-    main()
+Для максимизации произведения оптимально разбивать общее число голов на множители по 3.
+Если после деления на 3 остаётся 1, выгоднее заменить одну тройку на две двойки (так как 2*2=4 > 3*1=3).
+Если остаток 2 — просто добавляем одного дракона с двумя головами.
+
+Примеры:
+- M=6: 3+3 → 9
+- M=7: 3+2+2 → 12
+- M=8: 3+3+2 → 18
+- M=9: 3+3+3 → 27
+- M=10: 3+3+2+2 → 36
+
+Время работы — константное, только арифметика.
+"""
